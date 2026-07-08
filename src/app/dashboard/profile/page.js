@@ -1,8 +1,12 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import { useGetProfileQuery, useUpdateProfileMutation, useUploadFileMutation } from '@/store/apiSlice';
-import { Save, User, CheckCircle2, ShieldAlert, Code } from 'lucide-react';
-import toast from 'react-hot-toast';
+import React, { useState, useEffect } from "react";
+import {
+  useGetProfileQuery,
+  useUpdateProfileMutation,
+  useUploadFileMutation,
+} from "@/store/apiSlice";
+import { Save, User, CheckCircle2, ShieldAlert, Code } from "lucide-react";
+import toast from "react-hot-toast";
 
 const ManageProfile = () => {
   const { data: profileData } = useGetProfileQuery();
@@ -10,28 +14,28 @@ const ManageProfile = () => {
   const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation();
 
   const [profile, setProfile] = useState({
-    name: '',
-    title: '',
-    shortBio: '',
-    aboutMe: '',
-    workPhilosophy: '',
-    skillsFrontend: '',
-    skillsBackend: '',
-    skillsDevops: '',
-    email: '',
-    phone: '',
-    whatsapp: '',
-    linkedin: '',
-    github: '',
-    location: '',
-    resumeUrl: '',
-    avatarUrl: '',
+    name: "",
+    title: "",
+    shortBio: "",
+    aboutMe: "",
+    workPhilosophy: "",
+    skillsFrontend: "",
+    skillsBackend: "",
+    skillsDevops: "",
+    email: "",
+    phone: "",
+    whatsapp: "",
+    linkedin: "",
+    github: "",
+    location: "",
+    resumeUrl: "",
+    avatarUrl: "",
     stats: {
-      experienceYears: '',
-      projectsCompleted: '',
-      happyClients: '',
-      successRate: ''
-    }
+      experienceYears: "",
+      projectsCompleted: "",
+      happyClients: "",
+      successRate: "",
+    },
   });
 
   const [saved, setSaved] = useState(false);
@@ -39,67 +43,67 @@ const ManageProfile = () => {
   useEffect(() => {
     if (profileData) {
       setProfile({
-        name: profileData.name || '',
-        title: profileData.title || '',
-        shortBio: profileData.shortBio || '',
-        aboutMe: profileData.aboutMe || '',
-        workPhilosophy: profileData.workPhilosophy || '',
-        skillsFrontend: profileData.skillsFrontend || '',
-        skillsBackend: profileData.skillsBackend || '',
-        skillsDevops: profileData.skillsDevops || '',
-        email: profileData.email || '',
-        phone: profileData.phone || '',
-        whatsapp: profileData.whatsapp || '',
-        linkedin: profileData.linkedin || '',
-        github: profileData.github || '',
-        location: profileData.location || '',
-        resumeUrl: profileData.resumeUrl || '',
-        avatarUrl: profileData.avatarUrl || '',
+        name: profileData.name || "",
+        title: profileData.title || "",
+        shortBio: profileData.shortBio || "",
+        aboutMe: profileData.aboutMe || "",
+        workPhilosophy: profileData.workPhilosophy || "",
+        skillsFrontend: profileData.skillsFrontend || "",
+        skillsBackend: profileData.skillsBackend || "",
+        skillsDevops: profileData.skillsDevops || "",
+        email: profileData.email || "",
+        phone: profileData.phone || "",
+        whatsapp: profileData.whatsapp || "",
+        linkedin: profileData.linkedin || "",
+        github: profileData.github || "",
+        location: profileData.location || "",
+        resumeUrl: profileData.resumeUrl || "",
+        avatarUrl: profileData.avatarUrl || "",
         stats: {
-          experienceYears: profileData.stats?.experienceYears || '0',
-          projectsCompleted: profileData.stats?.projectsCompleted || '0',
-          happyClients: profileData.stats?.happyClients || '0',
-          successRate: profileData.stats?.successRate || '0%'
-        }
+          experienceYears: profileData.stats?.experienceYears || "0",
+          projectsCompleted: profileData.stats?.projectsCompleted || "0",
+          happyClients: profileData.stats?.happyClients || "0",
+          successRate: profileData.stats?.successRate || "0%",
+        },
       });
     }
   }, [profileData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProfile(prev => ({ ...prev, [name]: value }));
+    setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleResumeUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.type !== 'application/pdf') {
-      toast.error('Please upload a PDF file only.');
+    if (file.type !== "application/pdf") {
+      toast.error("Please upload a PDF file only.");
       return;
     }
 
     if (file.size > 3.5 * 1024 * 1024) {
-      toast.error('File is too large. Please upload a PDF under 3.5 MB.');
+      toast.error("File is too large. Please upload a PDF under 3.5 MB.");
       return;
     }
 
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
     if (profile.resumeUrl) {
-      formData.append('oldFileUrl', profile.resumeUrl);
+      formData.append("oldFileUrl", profile.resumeUrl);
     }
 
     try {
       const response = await uploadFile(formData).unwrap();
       const updatedProfile = { ...profile, resumeUrl: response.url };
       setProfile(updatedProfile);
-      
+
       // Save directly to MongoDB immediately
       await updateProfile(updatedProfile).unwrap();
-      toast.success('Resume uploaded and saved to database successfully!');
+      toast.success("Resume uploaded and saved to database successfully!");
     } catch (err) {
-      toast.error('Upload failed: ' + (err?.data?.message || 'Server error'));
+      toast.error("Upload failed: " + (err?.data?.message || "Server error"));
     }
   };
 
@@ -107,40 +111,40 @@ const ManageProfile = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file only.');
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file only.");
       return;
     }
 
-    if (file.size > 1.5 * 1024 * 1024) {
-      toast.error('File is too large. Please upload an image under 1.5 MB.');
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("File is too large. Please upload an image under 50 MB.");
       return;
     }
 
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
     if (profile.avatarUrl) {
-      formData.append('oldFileUrl', profile.avatarUrl);
+      formData.append("oldFileUrl", profile.avatarUrl);
     }
 
     try {
       const response = await uploadFile(formData).unwrap();
       const updatedProfile = { ...profile, avatarUrl: response.url };
       setProfile(updatedProfile);
-      
+
       // Save directly to MongoDB immediately
       await updateProfile(updatedProfile).unwrap();
-      toast.success('Avatar image uploaded successfully!');
+      toast.success("Avatar image uploaded successfully!");
     } catch (err) {
-      toast.error('Upload failed: ' + (err?.data?.message || 'Server error'));
+      toast.error("Upload failed: " + (err?.data?.message || "Server error"));
     }
   };
 
   const handleStatsChange = (e) => {
     const { name, value } = e.target;
-    setProfile(prev => ({
+    setProfile((prev) => ({
       ...prev,
-      stats: { ...prev.stats, [name]: value }
+      stats: { ...prev.stats, [name]: value },
     }));
   };
 
@@ -148,46 +152,52 @@ const ManageProfile = () => {
     e.preventDefault();
     try {
       await updateProfile(profile).unwrap();
-      toast.success('Profile updated successfully!');
+      toast.success("Profile updated successfully!");
       setSaved(true);
       setTimeout(() => {
         setSaved(false);
       }, 5000);
     } catch (err) {
-      toast.error('Failed to save profile: ' + (err?.data?.message || 'Server error'));
+      toast.error(
+        "Failed to save profile: " + (err?.data?.message || "Server error"),
+      );
     }
   };
 
   return (
     <div className="space-y-6 animate-fade-in text-left">
-      
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-black text-slate-800 dark:text-white">Profile Editor</h1>
+        <h1 className="text-2xl font-black text-slate-800 dark:text-white">
+          Profile Editor
+        </h1>
         <p className="text-xs text-slate-505 dark:text-slate-400 mt-1">
-          Customize your biography, coordinates, resume link, and technical credentials.
+          Customize your biography, coordinates, resume link, and technical
+          credentials.
         </p>
       </div>
 
       {saved && (
         <div className="flex items-center gap-2 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold animate-slide-up">
           <CheckCircle2 size={16} className="shrink-0" />
-          Profile configuration updated successfully! View changes on the public pages.
+          Profile configuration updated successfully! View changes on the public
+          pages.
         </div>
       )}
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6 text-xs">
-        
         {/* Basic Information Group */}
         <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 shadow-sm space-y-4">
           <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 pb-3 border-b border-slate-100 dark:border-slate-800">
             <User size={16} className="text-purple-500" /> Basic Bio Details
           </h2>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="font-bold text-slate-500 dark:text-slate-400">Full Name</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                Full Name
+              </label>
               <input
                 type="text"
                 name="name"
@@ -198,7 +208,9 @@ const ManageProfile = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="font-bold text-slate-500 dark:text-slate-400">Professional Title</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                Professional Title
+              </label>
               <input
                 type="text"
                 name="title"
@@ -211,7 +223,9 @@ const ManageProfile = () => {
           </div>
 
           <div className="space-y-1">
-            <label className="font-bold text-slate-500 dark:text-slate-400">Short Bio (Hero section introduction)</label>
+            <label className="font-bold text-slate-500 dark:text-slate-400">
+              Short Bio (Hero section introduction)
+            </label>
             <input
               type="text"
               name="shortBio"
@@ -223,7 +237,9 @@ const ManageProfile = () => {
           </div>
 
           <div className="space-y-1">
-            <label className="font-bold text-slate-500 dark:text-slate-400">Long Story (About Me Page Content)</label>
+            <label className="font-bold text-slate-500 dark:text-slate-400">
+              Long Story (About Me Page Content)
+            </label>
             <textarea
               name="aboutMe"
               value={profile.aboutMe}
@@ -237,7 +253,9 @@ const ManageProfile = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
             {/* Avatar Image Uploader */}
             <div className="md:col-span-2 space-y-1">
-              <label className="font-bold text-slate-500 dark:text-slate-400">Avatar Profile Image</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                Avatar Profile Image
+              </label>
               <div className="flex items-center gap-4 p-3 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-550/5 dark:bg-slate-900/30">
                 {/* Avatar Preview */}
                 <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 shadow-sm">
@@ -254,14 +272,18 @@ const ManageProfile = () => {
                     onChange={handleAvatarUpload}
                     className="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-purple-500/10 file:text-purple-650 dark:file:bg-purple-500/20 dark:file:text-purple-400 hover:file:bg-purple-500/20 cursor-pointer"
                   />
-                  <p className="text-[10px] text-slate-400 dark:text-slate-505">Upload a square JPG, PNG, or WEBP image file directly.</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-505">
+                    Upload a square JPG, PNG, or WEBP image file directly.
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Location */}
             <div className="space-y-1 self-stretch flex flex-col justify-end pb-1.5">
-              <label className="font-bold text-slate-500 dark:text-slate-400">Location</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                Location
+              </label>
               <input
                 type="text"
                 name="location"
@@ -278,11 +300,14 @@ const ManageProfile = () => {
         {/* About Details & Technical Toolkit */}
         <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 shadow-sm space-y-4">
           <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-            <Code size={16} className="text-purple-500" /> About Page & Technical Toolkit
+            <Code size={16} className="text-purple-500" /> About Page &
+            Technical Toolkit
           </h2>
 
           <div className="space-y-1">
-            <label className="font-bold text-slate-500 dark:text-slate-400">Work Philosophy</label>
+            <label className="font-bold text-slate-500 dark:text-slate-400">
+              Work Philosophy
+            </label>
             <textarea
               name="workPhilosophy"
               value={profile.workPhilosophy}
@@ -296,7 +321,9 @@ const ManageProfile = () => {
 
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-1">
-              <label className="font-bold text-slate-500 dark:text-slate-400">Frontend Skills (Comma separated)</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                Frontend Skills (Comma separated)
+              </label>
               <input
                 type="text"
                 name="skillsFrontend"
@@ -308,7 +335,9 @@ const ManageProfile = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="font-bold text-slate-500 dark:text-slate-400">Backend Skills (Comma separated)</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                Backend Skills (Comma separated)
+              </label>
               <input
                 type="text"
                 name="skillsBackend"
@@ -320,7 +349,9 @@ const ManageProfile = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="font-bold text-slate-500 dark:text-slate-400">Tools & DevOps Skills (Comma separated)</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                Tools & DevOps Skills (Comma separated)
+              </label>
               <input
                 type="text"
                 name="skillsDevops"
@@ -337,12 +368,15 @@ const ManageProfile = () => {
         {/* Contact and Links Group */}
         <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 shadow-sm space-y-4">
           <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-            <ShieldAlert size={16} className="text-indigo-500" /> Contact Channels & Links
+            <ShieldAlert size={16} className="text-indigo-500" /> Contact
+            Channels & Links
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1">
-              <label className="font-bold text-slate-500 dark:text-slate-400">Email</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                Email
+              </label>
               <input
                 type="email"
                 name="email"
@@ -353,7 +387,9 @@ const ManageProfile = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="font-bold text-slate-500 dark:text-slate-400">Phone Number</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                Phone Number
+              </label>
               <input
                 type="text"
                 name="phone"
@@ -364,7 +400,9 @@ const ManageProfile = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="font-bold text-slate-500 dark:text-slate-400">WhatsApp Web Link</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                WhatsApp Web Link
+              </label>
               <input
                 type="url"
                 name="whatsapp"
@@ -378,7 +416,9 @@ const ManageProfile = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="font-bold text-slate-500 dark:text-slate-400">LinkedIn Profile Link</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                LinkedIn Profile Link
+              </label>
               <input
                 type="url"
                 name="linkedin"
@@ -389,7 +429,9 @@ const ManageProfile = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="font-bold text-slate-500 dark:text-slate-400">GitHub Link</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                GitHub Link
+              </label>
               <input
                 type="url"
                 name="github"
@@ -402,8 +444,10 @@ const ManageProfile = () => {
           </div>
 
           <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
-            <label className="font-bold text-slate-500 dark:text-slate-400">Professional Resume (PDF)</label>
-            
+            <label className="font-bold text-slate-500 dark:text-slate-400">
+              Professional Resume (PDF)
+            </label>
+
             <div className="p-5 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-550/5 dark:bg-slate-900/30 space-y-4">
               <span className="block text-xs font-bold text-slate-400 dark:text-slate-505 uppercase tracking-wider">
                 Upload New Resume PDF
@@ -416,7 +460,10 @@ const ManageProfile = () => {
               />
             </div>
             <p className="text-[10px] text-slate-400 dark:text-slate-505">
-              Only PDF format is supported (Max 3.5 MB). The file will be stored securely on Cloudinary (or local server fallback) and saved directly to your MongoDB database. Remember to click "Save Changes" at the bottom of the page to apply changes.
+              Only PDF format is supported (Max 3.5 MB). The file will be stored
+              securely on Cloudinary (or local server fallback) and saved
+              directly to your MongoDB database. Remember to click "Save
+              Changes" at the bottom of the page to apply changes.
             </p>
           </div>
         </div>
@@ -424,12 +471,15 @@ const ManageProfile = () => {
         {/* Counter Stats Group */}
         <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 shadow-sm space-y-4">
           <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-            <Save size={16} className="text-emerald-500" /> Stats Counters Metrics
+            <Save size={16} className="text-emerald-500" /> Stats Counters
+            Metrics
           </h2>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="space-y-1">
-              <label className="font-bold text-slate-500 dark:text-slate-400">Experience (e.g. 5+)</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                Experience (e.g. 5+)
+              </label>
               <input
                 type="text"
                 name="experienceYears"
@@ -440,7 +490,9 @@ const ManageProfile = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="font-bold text-slate-500 dark:text-slate-400">Projects Completed (e.g. 40+)</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                Projects Completed (e.g. 40+)
+              </label>
               <input
                 type="text"
                 name="projectsCompleted"
@@ -451,7 +503,9 @@ const ManageProfile = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="font-bold text-slate-500 dark:text-slate-400">Happy Clients (e.g. 25+)</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                Happy Clients (e.g. 25+)
+              </label>
               <input
                 type="text"
                 name="happyClients"
@@ -462,7 +516,9 @@ const ManageProfile = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="font-bold text-slate-500 dark:text-slate-400">Success Rate (e.g. 99%)</label>
+              <label className="font-bold text-slate-500 dark:text-slate-400">
+                Success Rate (e.g. 99%)
+              </label>
               <input
                 type="text"
                 name="successRate"
@@ -485,7 +541,6 @@ const ManageProfile = () => {
             Save Profile Config
           </button>
         </div>
-
       </form>
     </div>
   );
