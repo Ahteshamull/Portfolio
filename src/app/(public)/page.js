@@ -62,6 +62,61 @@ const Typewriter = ({ texts, speed = 80, delayBetween = 2500 }) => {
   );
 };
 
+const parseStatValue = (value) => {
+  const stringValue = String(value || "").trim();
+  const match = stringValue.match(/^(\d+(?:\.\d+)?)(.*)$/);
+  if (!match) {
+    return { target: stringValue, suffix: "" };
+  }
+
+  return {
+    target: Number(match[1]),
+    suffix: match[2] || "",
+  };
+};
+
+const CountUp = ({ value }) => {
+  const { target, suffix } = parseStatValue(value);
+  const [displayValue, setDisplayValue] = React.useState(
+    typeof target === "number" ? 0 : value,
+  );
+
+  React.useEffect(() => {
+    if (typeof target !== "number" || Number.isNaN(target)) {
+      setDisplayValue(String(value));
+      return;
+    }
+
+    let frame = 0;
+    const duration = 1200;
+    const interval = 30;
+    const steps = Math.max(1, Math.ceil(duration / interval));
+    const increment = target / steps;
+    let current = 0;
+
+    const timer = setInterval(() => {
+      frame += 1;
+      current += increment;
+
+      if (frame >= steps) {
+        setDisplayValue(target);
+        clearInterval(timer);
+      } else {
+        setDisplayValue(Math.floor(current));
+      }
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [target, value]);
+
+  return (
+    <span>
+      {displayValue}
+      {typeof target === "number" ? suffix : ""}
+    </span>
+  );
+};
+
 const Home = () => {
   const { data: profileData } = useGetProfileQuery();
   const { data: projectsData } = useGetProjectsQuery();
@@ -72,6 +127,26 @@ const Home = () => {
   const featuredProjects = (projectsData || []).slice(0, 4);
   const services = (servicesData || []).slice(0, 3);
   const experiences = experiencesData || [];
+
+  const stats = [
+    {
+      value: profile.stats?.experienceYears || "5+",
+      label: "Years of Experience",
+    },
+    {
+      value:
+        profile.stats?.projectsCompleted || `${projectsData?.length || 0}+`,
+      label: "Projects Completed",
+    },
+    {
+      value: profile.stats?.happyClients || "30+",
+      label: "Happy Clients",
+    },
+    {
+      value: profile.stats?.successRate || "99%",
+      label: "Satisfaction Rate",
+    },
+  ];
 
   return (
     <div className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
@@ -228,41 +303,19 @@ const Home = () => {
       <section className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm py-10 border-y border-slate-200/50 dark:border-slate-800/60 transition-colors">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
-            <div className="flex flex-col items-center justify-center p-4">
-              <span className="text-3xl sm:text-4xl font-extrabold text-purple-600 dark:text-purple-400">
-                {profile.stats?.experienceYears || "5+"}
-              </span>
-              <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-semibold mt-1">
-                Years of Experience
-              </span>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-4 pt-8 md:pt-4">
-              <span className="text-3xl sm:text-4xl font-extrabold text-purple-600 dark:text-purple-400">
-                {profile.stats?.projectsCompleted || "45+"}
-              </span>
-              <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-semibold mt-1">
-                Projects Completed
-              </span>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-4 pt-8 md:pt-4">
-              <span className="text-3xl sm:text-4xl font-extrabold text-purple-600 dark:text-purple-400">
-                {profile.stats?.happyClients || "30+"}
-              </span>
-              <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-semibold mt-1">
-                Happy Clients
-              </span>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-4 pt-8 md:pt-4">
-              <span className="text-3xl sm:text-4xl font-extrabold text-purple-600 dark:text-purple-400">
-                {profile.stats?.successRate || "99%"}
-              </span>
-              <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-semibold mt-1">
-                Satisfaction Rate
-              </span>
-            </div>
+            {stats.map((stat) => (
+              <div
+                key={stat.label}
+                className="flex flex-col items-center justify-center p-4 pt-0 md:pt-4"
+              >
+                <span className="text-3xl sm:text-4xl font-extrabold text-purple-600 dark:text-purple-400">
+                  <CountUp value={stat.value} />
+                </span>
+                <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-semibold mt-1">
+                  {stat.label}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
