@@ -208,7 +208,7 @@ const ManageProjects = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-slate-200/20">
-                        <img src={project.imageUrl} alt={project.title} className="w-full h-full object-cover" />
+                        <img src={project.imageUrl || null} alt={project.title} className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <span className="font-bold text-slate-800 dark:text-slate-250 block">{project.title}</span>

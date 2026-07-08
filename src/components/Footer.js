@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { Mail, ArrowUp } from 'lucide-react';
-import { Github, Linkedin } from './BrandIcons';
+import { Github, Linkedin, Facebook, Whatsapp } from './BrandIcons';
 import { useGetProfileQuery } from '../store/apiSlice';
 
 
@@ -17,6 +17,8 @@ const Footer = () => {
 
   const githubUrl = profile?.github || '#';
   const linkedinUrl = profile?.linkedin || '#';
+  const facebookUrl = profile?.facebook || '#';
+  const whatsappUrl = profile?.whatsapp || '#';
   const emailUrl = profile?.email ? `mailto:${profile.email}` : '#';
 
   return (
@@ -52,6 +54,26 @@ const Footer = () => {
               suppressHydrationWarning={true}
             >
               <Linkedin size={18} />
+            </a>
+            <a
+              href={facebookUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-purple-500 hover:text-purple-500 text-slate-600 dark:text-slate-300 transition-all duration-300 shadow-sm"
+              aria-label="Facebook"
+              suppressHydrationWarning={true}
+            >
+              <Facebook size={18} />
+            </a>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-purple-500 hover:text-purple-500 text-slate-600 dark:text-slate-300 transition-all duration-300 shadow-sm"
+              aria-label="WhatsApp"
+              suppressHydrationWarning={true}
+            >
+              <Whatsapp size={18} />
             </a>
             <a
               href={emailUrl}

@@ -89,8 +89,12 @@ const ManageProfile = () => {
 
     try {
       const response = await uploadFile(formData).unwrap();
-      setProfile(prev => ({ ...prev, resumeUrl: response.url }));
-      toast.success('Resume uploaded successfully!');
+      const updatedProfile = { ...profile, resumeUrl: response.url };
+      setProfile(updatedProfile);
+      
+      // Save directly to MongoDB immediately
+      await updateProfile(updatedProfile).unwrap();
+      toast.success('Resume uploaded and saved to database successfully!');
     } catch (err) {
       toast.error('Upload failed: ' + (err?.data?.message || 'Server error'));
     }
@@ -228,7 +232,7 @@ const ManageProfile = () => {
                 {/* Avatar Preview */}
                 <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 shadow-sm">
                   <img
-                    src={profile.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"}
+                    src={profile.avatarUrl || null}
                     alt="Avatar Preview"
                     className="w-full h-full object-cover"
                   />
@@ -390,38 +394,19 @@ const ManageProfile = () => {
           <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
             <label className="font-bold text-slate-500 dark:text-slate-400">Professional Resume (PDF)</label>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Option A: Direct PDF Upload */}
-              <div className="p-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-550/5 dark:bg-slate-900/30">
-                <span className="block text-[10px] font-bold text-slate-400 dark:text-slate-505 uppercase tracking-wider mb-2">Option A: Upload Local PDF File</span>
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleResumeUpload}
-                  className="w-full text-xs text-slate-505 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-purple-500/10 file:text-purple-650 dark:file:bg-purple-500/20 dark:file:text-purple-400 hover:file:bg-purple-500/20 cursor-pointer"
-                />
-                {profile.resumeUrl && profile.resumeUrl.startsWith('data:application/pdf') && (
-                  <div className="flex items-center gap-1.5 text-xs text-emerald-500 font-bold mt-3">
-                    <span>✓ PDF File Uploaded (Base64 ready, click Save)</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Option B: External Link */}
-              <div className="p-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-550/5 dark:bg-slate-900/30 flex flex-col justify-center">
-                <span className="block text-[10px] font-bold text-slate-400 dark:text-slate-505 uppercase tracking-wider mb-2">Option B: External Resume URL</span>
-                <input
-                  type="text"
-                  name="resumeUrl"
-                  value={profile.resumeUrl && profile.resumeUrl.startsWith('data:application/pdf') ? '' : profile.resumeUrl}
-                  onChange={handleInputChange}
-                  placeholder="https://drive.google.com/file/... or any web link"
-                  className="w-full px-3 py-2 rounded-lg bg-slate-550/5 dark:bg-slate-950 border border-slate-205 dark:border-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-purple-500"
-                />
-              </div>
+            <div className="p-5 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-550/5 dark:bg-slate-900/30 space-y-4">
+              <span className="block text-xs font-bold text-slate-400 dark:text-slate-505 uppercase tracking-wider">
+                Upload New Resume PDF
+              </span>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={handleResumeUpload}
+                className="w-full text-xs text-slate-505 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-purple-500/10 file:text-purple-650 dark:file:bg-purple-500/20 dark:file:text-purple-400 hover:file:bg-purple-500/20 cursor-pointer"
+              />
             </div>
             <p className="text-[10px] text-slate-400 dark:text-slate-505">
-              Choose either option. You can upload a PDF directly from your computer (stored locally in browser data), or paste a link from Google Drive, Dropbox, or Canva.
+              Only PDF format is supported (Max 3.5 MB). The file will be stored securely on Cloudinary (or local server fallback) and saved directly to your MongoDB database. Remember to click "Save Changes" at the bottom of the page to apply changes.
             </p>
           </div>
         </div>

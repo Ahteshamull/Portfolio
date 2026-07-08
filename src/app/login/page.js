@@ -35,7 +35,7 @@ const Login = () => {
         window.location.href = '/dashboard';
       }
     } catch (err) {
-      setError(err?.data?.message || 'Invalid username or password. (Hint: admin / password123)');
+      setError(err?.data?.message || 'Invalid username or password.');
     }
   };
 
@@ -77,7 +77,7 @@ const Login = () => {
                 onChange={(e) => setUsername(e.target.value)}
                 required
                 className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-955 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-purple-500 text-slate-800 dark:text-slate-250 transition-colors"
-                placeholder="Enter username (admin)"
+                placeholder="Enter username"
               />
             </div>
           </div>
@@ -96,7 +96,7 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-955 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-purple-500 text-slate-800 dark:text-slate-250 transition-colors"
-                placeholder="Enter password (password123)"
+                placeholder="Enter password"
               />
             </div>
           </div>
@@ -111,11 +111,7 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="text-center pt-2">
-          <p className="text-[10px] text-slate-400 dark:text-slate-500">
-            For demonstration: username is <code className="bg-slate-100 dark:bg-slate-850 px-1 py-0.5 rounded text-slate-650 dark:text-slate-300">admin</code> and password is <code className="bg-slate-100 dark:bg-slate-850 px-1 py-0.5 rounded text-slate-650 dark:text-slate-300">password123</code>.
-          </p>
-        </div>
+        
 
       </div>
     </div>

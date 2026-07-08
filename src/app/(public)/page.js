@@ -1,19 +1,29 @@
 "use client";
-import React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowRight, Download, CheckCircle, Award, Briefcase, Users, Zap, Eye, Calendar } from 'lucide-react';
-import ProjectCard from '@/components/ProjectCard';
-import { 
-  useGetProfileQuery, 
-  useGetProjectsQuery, 
-  useGetServicesQuery, 
-  useGetExperiencesQuery 
-} from '@/store/apiSlice';
+import React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  ArrowRight,
+  Download,
+  CheckCircle,
+  Award,
+  Briefcase,
+  Users,
+  Zap,
+  Eye,
+  Calendar,
+} from "lucide-react";
+import ProjectCard from "@/components/ProjectCard";
+import {
+  useGetProfileQuery,
+  useGetProjectsQuery,
+  useGetServicesQuery,
+  useGetExperiencesQuery,
+} from "@/store/apiSlice";
 
 const Typewriter = ({ texts, speed = 80, delayBetween = 2500 }) => {
   const [currentTextIndex, setCurrentTextIndex] = React.useState(0);
-  const [currentText, setCurrentText] = React.useState('');
+  const [currentText, setCurrentText] = React.useState("");
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   React.useEffect(() => {
@@ -34,7 +44,7 @@ const Typewriter = ({ texts, speed = 80, delayBetween = 2500 }) => {
 
     if (!isDeleting && currentText === fullText) {
       timer = setTimeout(() => setIsDeleting(true), delayBetween);
-    } else if (isDeleting && currentText === '') {
+    } else if (isDeleting && currentText === "") {
       setIsDeleting(false);
       setCurrentTextIndex((prev) => (prev + 1) % texts.length);
     }
@@ -65,7 +75,6 @@ const Home = () => {
 
   return (
     <div className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
-      
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-12 pb-20 sm:pb-28">
         {/* Background Gradients */}
@@ -74,7 +83,6 @@ const Home = () => {
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
-            
             {/* Info Column */}
             <div className="flex-1 text-center lg:text-left space-y-6 max-w-2xl lg:max-w-none animate-slide-up">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
@@ -87,10 +95,17 @@ const Home = () => {
                   {profile.name}
                 </span>
               </h1>
-              
+
               <h2 className="text-xl sm:text-2xl font-bold text-slate-700 dark:text-slate-355 min-h-[40px]">
-                <Typewriter 
-                  texts={profile.title ? profile.title.split(',').map(r => r.trim()).filter(Boolean) : ['Senior Full-Stack Developer']} 
+                <Typewriter
+                  texts={
+                    profile.title
+                      ? profile.title
+                          .split(",")
+                          .map((r) => r.trim())
+                          .filter(Boolean)
+                      : ["Senior Full-Stack Developer"]
+                  }
                 />
               </h2>
 
@@ -107,47 +122,62 @@ const Home = () => {
                   Hire Me
                   <ArrowRight size={16} />
                 </Link>
-                <a
-                  href={profile.resumeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-                >
-                  <Eye size={16} className="text-purple-600 dark:text-purple-400" />
-                  View Resume
-                </a>
-                <a
-                  href={profile.resumeUrl}
-                  download
-                  className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-850 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-                >
-                  <Download size={16} />
-                  Download CV
-                </a>
+                {profile.resumeUrl && (
+                  <>
+                    <a
+                      href={profile.resumeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                    >
+                      <Eye
+                        size={16}
+                        className="text-purple-600 dark:text-purple-400"
+                      />
+                      View Resume
+                    </a>
+                    <a
+                      href={
+                        profile.resumeUrl.includes("cloudinary.com")
+                          ? profile.resumeUrl.replace(
+                              "/upload/",
+                              "/upload/fl_attachment/",
+                            )
+                          : `${profile.resumeUrl}?download=true`
+                      }
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-850 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                    >
+                      <Download size={16} />
+                      Download CV
+                    </a>
+                  </>
+                )}
               </div>
             </div>
 
             {/* Avatar Column */}
             <div className="flex-1 flex justify-center items-center relative animate-fade-in w-full min-h-[420px] sm:min-h-[520px] py-12">
-              
               {/* Soft Ambient Background Blur Glow */}
               <div className="absolute w-72 h-72 sm:w-96 sm:h-96 rounded-full bg-gradient-to-tr from-purple-600/20 to-indigo-600/10 blur-3xl pointer-events-none z-0" />
-              
+
               {/* Composition Container */}
               <div className="relative w-64 h-72 sm:w-80 sm:h-[360px] flex justify-center items-center">
-                
                 {/* Layer 1: Spin Glow Ring (Neon Aura) */}
                 <div className="absolute inset-[-8px] sm:inset-[-12px] rounded-[3.25rem] bg-gradient-to-tr from-purple-500 via-fuchsia-500 to-indigo-500 blur-xl opacity-50 dark:opacity-40 animate-[spin_15s_linear_infinite] z-0" />
-                
+
                 {/* Layer 2: Outer Rotating Dashed Orbit Ring */}
                 <div className="absolute w-[112%] h-[112%] rounded-[3.5rem] border border-dashed border-purple-500/20 dark:border-purple-400/25 animate-[spin_50s_linear_infinite] z-0 pointer-events-none" />
-                
+
                 {/* Layer 3: Tech Grid Dot Matrix Backdrop */}
-                <div 
+                <div
                   className="absolute w-40 h-40 sm:w-56 sm:h-56 -right-6 sm:-right-10 -top-6 sm:-top-8 z-0 opacity-30 dark:opacity-15 text-indigo-500 dark:text-indigo-400"
                   style={{
-                    backgroundImage: 'radial-gradient(currentColor 2px, transparent 2px)',
-                    backgroundSize: '16px 16px'
+                    backgroundImage:
+                      "radial-gradient(currentColor 2px, transparent 2px)",
+                    backgroundSize: "16px 16px",
                   }}
                 />
 
@@ -185,13 +215,11 @@ const Home = () => {
                   ) : (
                     <div className="w-full h-full bg-slate-200 dark:bg-slate-800 animate-pulse" />
                   )}
-                {/* Overlay Gradient on Hover */}
+                  {/* Overlay Gradient on Hover */}
                   <div className="absolute inset-0 bg-gradient-to-t from-purple-900/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 </div>
-                
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -200,7 +228,6 @@ const Home = () => {
       <section className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm py-10 border-y border-slate-200/50 dark:border-slate-800/60 transition-colors">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
-            
             <div className="flex flex-col items-center justify-center p-4">
               <span className="text-3xl sm:text-4xl font-extrabold text-purple-600 dark:text-purple-400">
                 {profile.stats?.experienceYears || "5+"}
@@ -236,7 +263,6 @@ const Home = () => {
                 Satisfaction Rate
               </span>
             </div>
-
           </div>
         </div>
       </section>
@@ -250,7 +276,8 @@ const Home = () => {
                 Featured Projects
               </h2>
               <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400">
-                A selection of personal creations and client solutions I've developed.
+                A selection of personal creations and client solutions I've
+                developed.
               </p>
             </div>
             <Link
@@ -258,7 +285,10 @@ const Home = () => {
               className="flex items-center gap-1 text-sm font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors group cursor-pointer"
             >
               View All Projects
-              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              <ArrowRight
+                size={16}
+                className="group-hover:translate-x-1 transition-transform"
+              />
             </Link>
           </div>
 
@@ -278,7 +308,8 @@ const Home = () => {
               Professional Services
             </h2>
             <p className="text-base text-slate-500 dark:text-slate-400">
-              I provide high-quality services to help businesses and start-ups scale their technical operations.
+              I provide high-quality services to help businesses and start-ups
+              scale their technical operations.
             </p>
           </div>
 
@@ -334,7 +365,7 @@ const Home = () => {
               <div key={item.id} className="relative pl-6 sm:pl-8">
                 {/* Timeline Dot */}
                 <div className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-purple-500 border-4 border-slate-50 dark:border-slate-950 shadow" />
-                
+
                 <div className="space-y-1 text-left">
                   <span className="flex items-center gap-1.5 text-xs text-purple-600 dark:text-purple-400 font-bold">
                     <Calendar size={12} />
@@ -371,13 +402,15 @@ const Home = () => {
       {/* Collaboration Call to Action */}
       <section className="py-20 bg-gradient-to-r from-purple-900 via-indigo-950 to-slate-950 text-white text-center relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-        
+
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative space-y-6">
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
             Have a project in mind? Let's build it together.
           </h2>
           <p className="text-slate-350 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
-            I am currently accepting freelance contracts and consulting engagements. Reach out to discuss how I can help bring your ideas to life.
+            I am currently accepting freelance contracts and consulting
+            engagements. Reach out to discuss how I can help bring your ideas to
+            life.
           </p>
           <div className="pt-4">
             <Link
@@ -391,7 +424,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
     </div>
   );
 };
