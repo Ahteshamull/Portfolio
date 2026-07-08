@@ -4,7 +4,7 @@ const getBaseUrl = () => {
   if (typeof window !== "undefined") {
     return (
       process.env.NEXT_PUBLIC_API_URL ||
-      "https://hasan-portfolio-backend-qysxkm-831699-35-180-95-158.sslip.io/"
+      "https://hasan-portfolio-backend-qysxkm-831699-35-180-95-158.sslip.io/api"
     );
   }
 };
