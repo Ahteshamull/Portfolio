@@ -86,6 +86,9 @@ const ManageProfile = () => {
 
     const formData = new FormData();
     formData.append('file', file);
+    if (profile.resumeUrl) {
+      formData.append('oldFileUrl', profile.resumeUrl);
+    }
 
     try {
       const response = await uploadFile(formData).unwrap();
@@ -116,10 +119,17 @@ const ManageProfile = () => {
 
     const formData = new FormData();
     formData.append('file', file);
+    if (profile.avatarUrl) {
+      formData.append('oldFileUrl', profile.avatarUrl);
+    }
 
     try {
       const response = await uploadFile(formData).unwrap();
-      setProfile(prev => ({ ...prev, avatarUrl: response.url }));
+      const updatedProfile = { ...profile, avatarUrl: response.url };
+      setProfile(updatedProfile);
+      
+      // Save directly to MongoDB immediately
+      await updateProfile(updatedProfile).unwrap();
       toast.success('Avatar image uploaded successfully!');
     } catch (err) {
       toast.error('Upload failed: ' + (err?.data?.message || 'Server error'));
