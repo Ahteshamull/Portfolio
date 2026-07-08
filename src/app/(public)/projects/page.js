@@ -1,17 +1,15 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { mockDb } from '@/services/mockDb';
 import ProjectCard from '@/components/ProjectCard';
 import { Layers } from 'lucide-react';
 
+import { useGetProjectsQuery } from '@/store/apiSlice';
+
 const Projects = () => {
-  const [projects, setProjects] = useState(mockDb.getDefaultProjects());
+  const { data: projectsData } = useGetProjectsQuery();
+  const projects = projectsData || [];
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
-
-  useEffect(() => {
-    setProjects(mockDb.getProjects());
-  }, []);
 
   const getFilteredProjects = () => {
     return projects.filter(project => {

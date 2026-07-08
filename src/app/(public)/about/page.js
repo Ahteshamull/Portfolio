@@ -1,17 +1,15 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { mockDb } from '@/services/mockDb';
 import Image from 'next/image';
 import { Calendar, Briefcase, GraduationCap, Code, Server, Wrench } from 'lucide-react';
+import { useGetProfileQuery, useGetExperiencesQuery } from '@/store/apiSlice';
 
 const About = () => {
-  const [profile, setProfile] = useState(mockDb.getDefaultProfile());
-  const [experience, setExperience] = useState(mockDb.getDefaultExperiences());
+  const { data: profileData } = useGetProfileQuery();
+  const { data: experiencesData } = useGetExperiencesQuery();
 
-  useEffect(() => {
-    setProfile(mockDb.getProfile());
-    setExperience(mockDb.getExperiences());
-  }, []);
+  const profile = profileData || {};
+  const experience = experiencesData || [];
 
   const skillGroups = [
     {
@@ -54,14 +52,18 @@ const About = () => {
         <section className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
           <div className="md:col-span-1 flex flex-col items-center text-center">
             <div className="w-48 h-48 rounded-2xl overflow-hidden shadow-lg border-2 border-purple-500/20 mb-4 relative">
-              <Image
-                src={profile.avatarUrl}
-                alt={profile.name}
-                fill
-                sizes="192px"
-                className="object-cover"
-                priority
-              />
+              {profile?.avatarUrl ? (
+                <Image
+                  src={profile.avatarUrl}
+                  alt={profile.name || "Avatar"}
+                  fill
+                  sizes="192px"
+                  className="object-cover"
+                  priority
+                />
+              ) : (
+                <div className="w-full h-full bg-slate-200 dark:bg-slate-800 animate-pulse" />
+              )}
             </div>
             <h1 className="text-2xl font-black">{profile.name}</h1>
             <p className="text-sm text-purple-600 dark:text-purple-400 font-semibold">{profile.title}</p>

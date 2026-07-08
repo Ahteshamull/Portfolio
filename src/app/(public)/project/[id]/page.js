@@ -3,37 +3,35 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { mockDb } from '@/services/mockDb';
 import { ArrowLeft, ExternalLink, Calendar, Tag, Briefcase, Monitor, CheckCircle, FileCode } from 'lucide-react';
 import { Github } from '@/components/BrandIcons';
 
+import { useGetProjectByIdQuery } from '@/store/apiSlice';
+
 const ProjectDetails = () => {
   const { id } = useParams();
-  const getProjectData = () => {
-    if (!id) return null;
-    return mockDb.getDefaultProjects().find(p => p.id === id) || null;
-  };
-
-  const [project, setProject] = useState(getProjectData());
-  const [activeImage, setActiveImage] = useState(() => {
-    const proj = getProjectData();
-    if (proj) {
-      const projImages = proj.images && proj.images.length > 0 ? proj.images : [proj.imageUrl];
-      return projImages[0];
-    }
-    return '';
-  });
+  const { data: project, isLoading } = useGetProjectByIdQuery(id, { skip: !id });
+  const [activeImage, setActiveImage] = useState('');
 
   useEffect(() => {
-    if (!id) return;
-    const proj = mockDb.getProjects().find(p => p.id === id);
-    setProject(proj);
-    if (proj) {
-      const projImages = proj.images && proj.images.length > 0 ? proj.images : [proj.imageUrl];
+    if (project) {
+      const projImages = project.images && project.images.length > 0 ? project.images : [project.imageUrl];
       setActiveImage(projImages[0]);
     }
+  }, [project]);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
-  }, [id]);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4">
+        <div className="w-8 h-8 border-4 border-purple-650 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-xs text-slate-500 dark:text-slate-450 mt-4">Loading project details...</p>
+      </div>
+    );
+  }
 
   if (!project) {
     return (
@@ -105,8 +103,8 @@ const ProjectDetails = () => {
           {/* Big Showcase Image */}
           <div className="w-full h-64 sm:h-[450px] rounded-2xl overflow-hidden shadow-lg border border-slate-200/20 bg-slate-900/5 dark:bg-slate-900/40 relative">
             <Image
-              src={activeImage || project.imageUrl}
-              alt={project.title}
+              src={activeImage || project.imageUrl || "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=60"}
+              alt={project.title || 'Project Image'}
               fill
               sizes="(max-width: 768px) 100vw, 800px"
               className="object-cover object-top transition-all duration-500"

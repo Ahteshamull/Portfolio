@@ -1,10 +1,15 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { mockDb } from '@/services/mockDb';
 import { Mail, Phone, MapPin, Send, CheckCircle2, MessageSquare } from 'lucide-react';
+import toast from 'react-hot-toast';
+
+import { useCreateMessageMutation, useGetProfileQuery } from '@/store/apiSlice';
 
 const Contact = () => {
-  const [profile, setProfile] = useState(mockDb.getDefaultProfile());
+  const { data: profileData } = useGetProfileQuery();
+  const profile = profileData || {};
+  const [createMessage] = useCreateMessageMutation();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,10 +18,6 @@ const Contact = () => {
   });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
-
-  useEffect(() => {
-    setProfile(mockDb.getProfile());
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -41,23 +42,28 @@ const Contact = () => {
     return Object.keys(tempErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
-    mockDb.addMessage({
-      name: formData.name,
-      email: formData.email,
-      subject: formData.subject,
-      message: formData.message
-    });
+    try {
+      await createMessage({
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message
+      }).unwrap();
 
-    setSubmitted(true);
-    setFormData({ name: '', email: '', subject: '', message: '' });
+      toast.success('Message sent successfully!');
+      setSubmitted(true);
+      setFormData({ name: '', email: '', subject: '', message: '' });
 
-    setTimeout(() => {
-      setSubmitted(false);
-    }, 6000);
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 6000);
+    } catch (err) {
+      toast.error('Failed to send message: ' + (err?.data?.message || 'Please check your connection.'));
+    }
   };
 
   return (

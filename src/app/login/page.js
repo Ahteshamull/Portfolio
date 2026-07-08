@@ -2,12 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock, User, AlertCircle } from 'lucide-react';
+import { useLoginMutation } from '@/store/apiSlice';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
+  const [login, { isLoading }] = useLoginMutation();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -17,21 +19,23 @@ const Login = () => {
     }
   }, [router]);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
 
     const cleanUsername = username.trim().toLowerCase();
     const cleanPassword = password.trim();
 
-    if (cleanUsername === 'admin' && cleanPassword === 'password123') {
+    try {
+      const response = await login({ username: cleanUsername, password: cleanPassword }).unwrap();
       if (typeof window !== 'undefined') {
+        sessionStorage.setItem('token', response.token);
         sessionStorage.setItem('admin_authenticated', 'true');
         // Force page reload to ensure auth states refresh
         window.location.href = '/dashboard';
       }
-    } else {
-      setError('Invalid username or password. (Hint: admin / password123)');
+    } catch (err) {
+      setError(err?.data?.message || 'Invalid username or password. (Hint: admin / password123)');
     }
   };
 
@@ -100,9 +104,10 @@ const Login = () => {
           {/* Login Submit Button */}
           <button
             type="submit"
-            className="w-full py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-550 hover:to-indigo-550 shadow-md shadow-purple-500/10 cursor-pointer hover:shadow-purple-500/20 active:scale-99 transition-all"
+            disabled={isLoading}
+            className="w-full py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-550 hover:to-indigo-550 shadow-md shadow-purple-500/10 cursor-pointer hover:shadow-purple-500/20 active:scale-99 transition-all disabled:opacity-50"
           >
-            Authenticate Admin
+            {isLoading ? 'Authenticating Admin...' : 'Authenticate Admin'}
           </button>
         </form>
 

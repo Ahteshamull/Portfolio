@@ -1,10 +1,21 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { mockDb } from '@/services/mockDb';
+import { 
+  useGetExperiencesQuery, 
+  useCreateExperienceMutation, 
+  useUpdateExperienceMutation, 
+  useDeleteExperienceMutation 
+} from '@/store/apiSlice';
 import { Plus, Edit2, Trash2, Calendar, Briefcase, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const ManageExperiences = () => {
-  const [experiences, setExperiences] = useState([]);
+  const { data: experiencesData } = useGetExperiencesQuery();
+  const [createExperience] = useCreateExperienceMutation();
+  const [updateExperience] = useUpdateExperienceMutation();
+  const [deleteExperience] = useDeleteExperienceMutation();
+
+  const experiences = experiencesData || [];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentExperience, setCurrentExperience] = useState(null);
   
@@ -14,14 +25,6 @@ const ManageExperiences = () => {
     period: '',
     description: ''
   });
-
-  const loadExperiences = () => {
-    setExperiences(mockDb.getExperiences());
-  };
-
-  useEffect(() => {
-    loadExperiences();
-  }, []);
 
   const openAddModal = () => {
     setCurrentExperience(null);
@@ -45,10 +48,14 @@ const ManageExperiences = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (confirm('Are you sure you want to delete this work experience?')) {
-      mockDb.deleteExperience(id);
-      loadExperiences();
+      try {
+        await deleteExperience(id).unwrap();
+        toast.success('Experience deleted successfully!');
+      } catch (err) {
+        toast.error('Failed to delete experience.');
+      }
     }
   };
 
@@ -57,7 +64,7 @@ const ManageExperiences = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     
     const expData = {
@@ -67,13 +74,18 @@ const ManageExperiences = () => {
       description: formData.description
     };
 
-    if (currentExperience) {
-      expData.id = currentExperience.id;
+    try {
+      if (currentExperience) {
+        await updateExperience({ id: currentExperience.id, ...expData }).unwrap();
+        toast.success('Experience updated successfully!');
+      } else {
+        await createExperience(expData).unwrap();
+        toast.success('Experience created successfully!');
+      }
+      setIsModalOpen(false);
+    } catch (err) {
+      toast.error('Failed to save experience: ' + (err?.data?.message || 'Server error'));
     }
-
-    mockDb.saveExperience(expData);
-    setIsModalOpen(false);
-    loadExperiences();
   };
 
   return (

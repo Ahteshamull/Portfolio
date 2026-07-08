@@ -1,11 +1,22 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { mockDb } from '@/services/mockDb';
+import { 
+  useGetServicesQuery, 
+  useCreateServiceMutation, 
+  useUpdateServiceMutation, 
+  useDeleteServiceMutation 
+} from '@/store/apiSlice';
 import { Plus, Edit2, Trash2, X, Settings } from 'lucide-react';
 import * as Icons from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const ManageServices = () => {
-  const [services, setServices] = useState([]);
+  const { data: servicesData } = useGetServicesQuery();
+  const [createService] = useCreateServiceMutation();
+  const [updateService] = useUpdateServiceMutation();
+  const [deleteService] = useDeleteServiceMutation();
+
+  const services = servicesData || [];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentService, setCurrentService] = useState(null);
 
@@ -15,14 +26,6 @@ const ManageServices = () => {
     iconName: 'Code',
     price: ''
   });
-
-  const loadServices = () => {
-    setServices(mockDb.getServices());
-  };
-
-  useEffect(() => {
-    loadServices();
-  }, []);
 
   const openAddModal = () => {
     setCurrentService(null);
@@ -46,10 +49,14 @@ const ManageServices = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (confirm('Are you sure you want to delete this service?')) {
-      mockDb.deleteService(id);
-      loadServices();
+      try {
+        await deleteService(id).unwrap();
+        toast.success('Service deleted successfully!');
+      } catch (err) {
+        toast.error('Failed to delete service.');
+      }
     }
   };
 
@@ -58,7 +65,7 @@ const ManageServices = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     const serviceData = {
       title: formData.title,
@@ -67,13 +74,18 @@ const ManageServices = () => {
       price: formData.price
     };
 
-    if (currentService) {
-      serviceData.id = currentService.id;
+    try {
+      if (currentService) {
+        await updateService({ id: currentService.id, ...serviceData }).unwrap();
+        toast.success('Service updated successfully!');
+      } else {
+        await createService(serviceData).unwrap();
+        toast.success('Service created successfully!');
+      }
+      setIsModalOpen(false);
+    } catch (err) {
+      toast.error('Failed to save service: ' + (err?.data?.message || 'Server error'));
     }
-
-    mockDb.saveService(serviceData);
-    setIsModalOpen(false);
-    loadServices();
   };
 
   const renderIcon = (iconName) => {

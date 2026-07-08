@@ -1,16 +1,14 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { mockDb } from '@/services/mockDb';
 import * as Icons from 'lucide-react';
 import { CheckCircle2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
-const Services = () => {
-  const [services, setServices] = useState(mockDb.getDefaultServices());
+import { useGetServicesQuery } from '@/store/apiSlice';
 
-  useEffect(() => {
-    setServices(mockDb.getServices());
-  }, []);
+const Services = () => {
+  const { data: servicesData } = useGetServicesQuery();
+  const services = servicesData || [];
 
   const renderIcon = (iconName) => {
     const IconComp = Icons[iconName];

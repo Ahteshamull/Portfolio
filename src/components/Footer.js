@@ -1,15 +1,13 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Mail, ArrowUp } from 'lucide-react';
 import { Github, Linkedin } from './BrandIcons';
-import { mockDb } from '../services/mockDb';
+import { useGetProfileQuery } from '../store/apiSlice';
+
 
 const Footer = () => {
-  const [profile, setProfile] = useState(null);
-
-  useEffect(() => {
-    setProfile(mockDb.getProfile());
-  }, []);
+  const { data: profileData } = useGetProfileQuery();
+  const profile = profileData || {};
 
   const scrollToTop = () => {
     if (typeof window !== 'undefined') {

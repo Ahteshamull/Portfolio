@@ -1,9 +1,14 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { mockDb } from '@/services/mockDb';
+import { useGetProfileQuery, useUpdateProfileMutation, useUploadFileMutation } from '@/store/apiSlice';
 import { Save, User, CheckCircle2, ShieldAlert, Code } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const ManageProfile = () => {
+  const { data: profileData } = useGetProfileQuery();
+  const [updateProfile] = useUpdateProfileMutation();
+  const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation();
+
   const [profile, setProfile] = useState({
     name: '',
     title: '',
@@ -32,78 +37,89 @@ const ManageProfile = () => {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    const data = mockDb.getProfile();
-    setProfile({
-      name: data.name || '',
-      title: data.title || '',
-      shortBio: data.shortBio || '',
-      aboutMe: data.aboutMe || '',
-      workPhilosophy: data.workPhilosophy || '',
-      skillsFrontend: data.skillsFrontend || '',
-      skillsBackend: data.skillsBackend || '',
-      skillsDevops: data.skillsDevops || '',
-      email: data.email || '',
-      phone: data.phone || '',
-      whatsapp: data.whatsapp || '',
-      linkedin: data.linkedin || '',
-      github: data.github || '',
-      location: data.location || '',
-      resumeUrl: data.resumeUrl || '',
-      avatarUrl: data.avatarUrl || '',
-      stats: {
-        experienceYears: data.stats?.experienceYears || '0',
-        projectsCompleted: data.stats?.projectsCompleted || '0',
-        happyClients: data.stats?.happyClients || '0',
-        successRate: data.stats?.successRate || '0%'
-      }
-    });
-  }, []);
+    if (profileData) {
+      setProfile({
+        name: profileData.name || '',
+        title: profileData.title || '',
+        shortBio: profileData.shortBio || '',
+        aboutMe: profileData.aboutMe || '',
+        workPhilosophy: profileData.workPhilosophy || '',
+        skillsFrontend: profileData.skillsFrontend || '',
+        skillsBackend: profileData.skillsBackend || '',
+        skillsDevops: profileData.skillsDevops || '',
+        email: profileData.email || '',
+        phone: profileData.phone || '',
+        whatsapp: profileData.whatsapp || '',
+        linkedin: profileData.linkedin || '',
+        github: profileData.github || '',
+        location: profileData.location || '',
+        resumeUrl: profileData.resumeUrl || '',
+        avatarUrl: profileData.avatarUrl || '',
+        stats: {
+          experienceYears: profileData.stats?.experienceYears || '0',
+          projectsCompleted: profileData.stats?.projectsCompleted || '0',
+          happyClients: profileData.stats?.happyClients || '0',
+          successRate: profileData.stats?.successRate || '0%'
+        }
+      });
+    }
+  }, [profileData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProfile(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleResumeUpload = (e) => {
+  const handleResumeUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     if (file.type !== 'application/pdf') {
-      alert('Please upload a PDF file only.');
+      toast.error('Please upload a PDF file only.');
       return;
     }
 
     if (file.size > 3.5 * 1024 * 1024) {
-      alert('File is too large. Please upload a PDF under 3.5 MB.');
+      toast.error('File is too large. Please upload a PDF under 3.5 MB.');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setProfile(prev => ({ ...prev, resumeUrl: reader.result }));
-    };
-    reader.readAsDataURL(file);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await uploadFile(formData).unwrap();
+      setProfile(prev => ({ ...prev, resumeUrl: response.url }));
+      toast.success('Resume uploaded successfully!');
+    } catch (err) {
+      toast.error('Upload failed: ' + (err?.data?.message || 'Server error'));
+    }
   };
 
-  const handleAvatarUpload = (e) => {
+  const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file only.');
+      toast.error('Please upload an image file only.');
       return;
     }
 
     if (file.size > 1.5 * 1024 * 1024) {
-      alert('File is too large. Please upload an image under 1.5 MB.');
+      toast.error('File is too large. Please upload an image under 1.5 MB.');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setProfile(prev => ({ ...prev, avatarUrl: reader.result }));
-    };
-    reader.readAsDataURL(file);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await uploadFile(formData).unwrap();
+      setProfile(prev => ({ ...prev, avatarUrl: response.url }));
+      toast.success('Avatar image uploaded successfully!');
+    } catch (err) {
+      toast.error('Upload failed: ' + (err?.data?.message || 'Server error'));
+    }
   };
 
   const handleStatsChange = (e) => {
@@ -114,13 +130,18 @@ const ManageProfile = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    mockDb.updateProfile(profile);
-    setSaved(true);
-    setTimeout(() => {
-      setSaved(false);
-    }, 5000);
+    try {
+      await updateProfile(profile).unwrap();
+      toast.success('Profile updated successfully!');
+      setSaved(true);
+      setTimeout(() => {
+        setSaved(false);
+      }, 5000);
+    } catch (err) {
+      toast.error('Failed to save profile: ' + (err?.data?.message || 'Server error'));
+    }
   };
 
   return (

@@ -1,17 +1,22 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Download, CheckCircle, Award, Briefcase, Users, Zap, Eye, Calendar } from 'lucide-react';
-import { mockDb } from '@/services/mockDb';
 import ProjectCard from '@/components/ProjectCard';
+import { 
+  useGetProfileQuery, 
+  useGetProjectsQuery, 
+  useGetServicesQuery, 
+  useGetExperiencesQuery 
+} from '@/store/apiSlice';
 
 const Typewriter = ({ texts, speed = 80, delayBetween = 2500 }) => {
-  const [currentTextIndex, setCurrentTextIndex] = useState(0);
-  const [currentText, setCurrentText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [currentTextIndex, setCurrentTextIndex] = React.useState(0);
+  const [currentText, setCurrentText] = React.useState('');
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!texts || texts.length === 0) return;
 
     let timer;
@@ -48,17 +53,15 @@ const Typewriter = ({ texts, speed = 80, delayBetween = 2500 }) => {
 };
 
 const Home = () => {
-  const [profile, setProfile] = useState(mockDb.getDefaultProfile());
-  const [featuredProjects, setFeaturedProjects] = useState(mockDb.getDefaultProjects().slice(0, 4));
-  const [services, setServices] = useState(mockDb.getDefaultServices().slice(0, 3));
-  const [experiences, setExperiences] = useState(mockDb.getDefaultExperiences());
+  const { data: profileData } = useGetProfileQuery();
+  const { data: projectsData } = useGetProjectsQuery();
+  const { data: servicesData } = useGetServicesQuery();
+  const { data: experiencesData } = useGetExperiencesQuery();
 
-  useEffect(() => {
-    setProfile(mockDb.getProfile());
-    setFeaturedProjects(mockDb.getProjects().slice(0, 4));
-    setServices(mockDb.getServices().slice(0, 3));
-    setExperiences(mockDb.getExperiences());
-  }, []);
+  const profile = profileData || {};
+  const featuredProjects = (projectsData || []).slice(0, 4);
+  const services = (servicesData || []).slice(0, 3);
+  const experiences = experiencesData || [];
 
   return (
     <div className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
@@ -170,14 +173,18 @@ const Home = () => {
 
                 {/* Layer 5: Main Avatar Card (Squircle Card Layout) */}
                 <div className="relative z-10 w-full h-full rounded-[2.75rem] overflow-hidden border-[6px] border-slate-50 dark:border-slate-950 shadow-2xl hover:scale-[1.03] hover:rotate-1 transition-all duration-500 group cursor-pointer bg-slate-100 dark:bg-slate-900">
-                  <Image
-                    src={profile.avatarUrl}
-                    alt={profile.name}
-                    fill
-                    sizes="(max-width: 640px) 256px, 320px"
-                    className="object-cover object-center group-hover:scale-108 transition-transform duration-700"
-                    priority
-                  />
+                  {profile.avatarUrl ? (
+                    <Image
+                      src={profile.avatarUrl}
+                      alt={profile.name || "Avatar"}
+                      fill
+                      sizes="(max-width: 640px) 256px, 320px"
+                      className="object-cover object-center group-hover:scale-108 transition-transform duration-700"
+                      priority
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-slate-200 dark:bg-slate-800 animate-pulse" />
+                  )}
                 {/* Overlay Gradient on Hover */}
                   <div className="absolute inset-0 bg-gradient-to-t from-purple-900/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 </div>

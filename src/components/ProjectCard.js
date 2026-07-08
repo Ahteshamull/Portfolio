@@ -16,7 +16,7 @@ const ProjectCard = ({ project }) => {
       <Link href={`/project/${project.id}`} className="relative h-48 sm:h-52 w-full overflow-hidden block" suppressHydrationWarning={true}>
         <Image
           src={imageUrl || "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=60"}
-          alt={title}
+          alt={title || 'Project'}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out"

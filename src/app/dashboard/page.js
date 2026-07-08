@@ -1,50 +1,54 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { mockDb } from '@/services/mockDb';
 import { Mail, Check, Trash2, Calendar, User, Eye, Layers } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { 
+  useGetMessagesQuery, 
+  useGetProjectsQuery, 
+  useGetServicesQuery, 
+  useMarkMessageReadMutation, 
+  useDeleteMessageMutation 
+} from '@/store/apiSlice';
 
 const MessagesInbox = () => {
-  const [messages, setMessages] = useState([]);
-  const [stats, setStats] = useState({
-    projectsCount: 0,
-    servicesCount: 0,
-    totalMessages: 0,
-    unreadMessages: 0
-  });
+  const { data: messagesData } = useGetMessagesQuery();
+  const { data: projectsData } = useGetProjectsQuery();
+  const { data: servicesData } = useGetServicesQuery();
+  
+  const [markRead] = useMarkMessageReadMutation();
+  const [deleteMessage] = useDeleteMessageMutation();
+
   const [activeMessage, setActiveMessage] = useState(null);
 
-  const loadData = () => {
-    const allMessages = mockDb.getMessages();
-    const allProjects = mockDb.getProjects();
-    const allServices = mockDb.getServices();
-
-    setMessages(allMessages);
-    setStats({
-      projectsCount: allProjects.length,
-      servicesCount: allServices.length,
-      totalMessages: allMessages.length,
-      unreadMessages: allMessages.filter(m => !m.read).length
-    });
+  const messages = messagesData || [];
+  const stats = {
+    projectsCount: projectsData?.length || 0,
+    servicesCount: servicesData?.length || 0,
+    totalMessages: messages.length,
+    unreadMessages: messages.filter(m => !m.read).length
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const handleRead = (id) => {
-    mockDb.markMessageRead(id);
-    loadData();
-    const updatedMsg = mockDb.getMessages().find(m => m.id === id);
-    setActiveMessage(updatedMsg);
+  const handleRead = async (id) => {
+    try {
+      await markRead(id).unwrap();
+      const updatedMsg = messages.find(m => m.id === id);
+      if (updatedMsg) {
+        setActiveMessage({ ...updatedMsg, read: true });
+      }
+    } catch (err) {
+      console.error('Failed to mark message as read:', err);
+    }
   };
 
-  const handleDelete = (id) => {
-    if (confirm('Are you sure you want to delete this message?')) {
-      mockDb.deleteMessage(id);
+  const handleDelete = async (id) => {
+    try {
+      await deleteMessage(id).unwrap();
       if (activeMessage && activeMessage.id === id) {
         setActiveMessage(null);
       }
-      loadData();
+      toast.success('Message deleted successfully!');
+    } catch (err) {
+      toast.error('Failed to delete message.');
     }
   };
 

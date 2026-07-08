@@ -1,11 +1,24 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { mockDb } from '@/services/mockDb';
+import { 
+  useGetProjectsQuery, 
+  useCreateProjectMutation, 
+  useUpdateProjectMutation, 
+  useDeleteProjectMutation,
+  useUploadFileMutation
+} from '@/store/apiSlice';
 import { Plus, Edit2, Trash2, X, ExternalLink, Monitor, Briefcase } from 'lucide-react';
 import { Github } from '@/components/BrandIcons';
+import toast from 'react-hot-toast';
 
 const ManageProjects = () => {
-  const [projects, setProjects] = useState([]);
+  const { data: projectsData } = useGetProjectsQuery();
+  const [createProject] = useCreateProjectMutation();
+  const [updateProject] = useUpdateProjectMutation();
+  const [deleteProject] = useDeleteProjectMutation();
+  const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation();
+
+  const projects = projectsData || [];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentProject, setCurrentProject] = useState(null);
   
@@ -22,14 +35,6 @@ const ManageProjects = () => {
     status: 'Completed',
     date: ''
   });
-
-  const loadProjects = () => {
-    setProjects(mockDb.getProjects());
-  };
-
-  useEffect(() => {
-    loadProjects();
-  }, []);
 
   const openAddModal = () => {
     setCurrentProject(null);
@@ -67,10 +72,14 @@ const ManageProjects = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (confirm('Are you sure you want to delete this project?')) {
-      mockDb.deleteProject(id);
-      loadProjects();
+      try {
+        await deleteProject(id).unwrap();
+        toast.success('Project deleted successfully!');
+      } catch (err) {
+        toast.error('Failed to delete project.');
+      }
     }
   };
 
@@ -79,7 +88,48 @@ const ManageProjects = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFormSubmit = (e) => {
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    let newUrls = [];
+    
+    for (const file of files) {
+      const isImage = file.type.startsWith('image/') || file.name.toLowerCase().match(/\.(heic|heif|jpg|jpeg|png|gif|webp)$/);
+      if (!isImage) {
+        toast.error(`File ${file.name} is not an image.`);
+        continue;
+      }
+      
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error(`File ${file.name} is too large. Max size is 20MB.`);
+        continue;
+      }
+      
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      
+      try {
+        const response = await uploadFile(formDataUpload).unwrap();
+        newUrls.push(response.url);
+      } catch (err) {
+        toast.error(`Failed to upload ${file.name}`);
+      }
+    }
+    
+    if (newUrls.length > 0) {
+      toast.success(`${newUrls.length} image(s) uploaded successfully!`);
+      setFormData(prev => {
+        const currentImages = prev.imagesString ? prev.imagesString.split(',').map(u => u.trim()).filter(Boolean) : [];
+        const combined = [...currentImages, ...newUrls].join(', ');
+        return { ...prev, imagesString: combined };
+      });
+    }
+    
+    e.target.value = '';
+  };
+
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     
     const techStack = formData.techStackString
@@ -108,13 +158,18 @@ const ManageProjects = () => {
       date: formData.date
     };
 
-    if (currentProject) {
-      projectData.id = currentProject.id;
+    try {
+      if (currentProject) {
+        await updateProject({ id: currentProject.id, ...projectData }).unwrap();
+        toast.success('Project updated successfully!');
+      } else {
+        await createProject(projectData).unwrap();
+        toast.success('Project created successfully!');
+      }
+      setIsModalOpen(false);
+    } catch (err) {
+      toast.error('Failed to save project: ' + (err?.data?.message || 'Server error'));
     }
-
-    mockDb.saveProject(projectData);
-    setIsModalOpen(false);
-    loadProjects();
   };
 
   return (
@@ -341,15 +396,54 @@ const ManageProjects = () => {
 
               {/* Images Array Field (comma-separated URLs) */}
               <div className="space-y-1">
-                <label className="font-bold text-slate-500 dark:text-slate-400">Showcase Image Gallery (comma-separated URLs, first is main image)</label>
-                <textarea
-                  name="imagesString"
-                  value={formData.imagesString}
-                  onChange={handleInputChange}
-                  rows="3"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-550/5 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-purple-500 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-650 transition-colors resize-none"
-                  placeholder="https://images.unsplash.com/photo-1..., https://images.unsplash.com/photo-2..."
-                />
+                <div className="flex justify-between items-center">
+                  <label className="font-bold text-slate-500 dark:text-slate-400">Showcase Image Gallery</label>
+                  <label className="cursor-pointer text-xs font-bold text-purple-600 dark:text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 px-3 py-1 rounded-full transition-colors flex items-center gap-1">
+                    {isUploading ? (
+                      <span className="animate-pulse">Uploading...</span>
+                    ) : (
+                      <>
+                        <Plus size={12} /> Upload Images
+                        <input 
+                          type="file" 
+                          multiple 
+                          accept="image/*" 
+                          className="hidden" 
+                          onChange={handleImageUpload}
+                          disabled={isUploading}
+                        />
+                      </>
+                    )}
+                  </label>
+                </div>
+                {/* Visual Preview instead of textarea */}
+                <div className="flex flex-wrap gap-3 pt-2">
+                  {formData.imagesString ? formData.imagesString.split(',').map((url, idx) => {
+                    const trimmedUrl = url.trim();
+                    if (!trimmedUrl) return null;
+                    return (
+                      <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 w-24 h-24 bg-slate-100 dark:bg-slate-900">
+                        <img src={trimmedUrl} alt={`Upload ${idx}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newImages = formData.imagesString.split(',').map(u => u.trim()).filter(u => u && u !== trimmedUrl).join(', ');
+                            setFormData(prev => ({ ...prev, imagesString: newImages }));
+                          }}
+                          className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 size={20} className="text-red-400 mb-1" />
+                          <span className="text-[10px] text-white font-semibold uppercase tracking-wider">Remove</span>
+                        </button>
+                      </div>
+                    );
+                  }) : (
+                    <div className="w-full py-8 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl flex flex-col items-center justify-center text-slate-400">
+                      <p className="text-sm">No images uploaded yet</p>
+                      <p className="text-xs mt-1">Click "Upload Images" to add to gallery</p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
