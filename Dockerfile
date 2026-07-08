@@ -16,8 +16,9 @@ COPY . .
 # Build the Next.js application
 RUN npm run build
 
-# Set port
+# Set port and host
 ENV PORT=6556
+ENV HOSTNAME="0.0.0.0"
 EXPOSE 6556
 
 # Start the application
