@@ -1,8 +1,15 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { Calendar, Briefcase, GraduationCap, Code, Server, Wrench } from 'lucide-react';
-import { useGetProfileQuery, useGetExperiencesQuery } from '@/store/apiSlice';
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import {
+  Calendar,
+  Briefcase,
+  GraduationCap,
+  Code,
+  Server,
+  Wrench,
+} from "lucide-react";
+import { useGetProfileQuery, useGetExperiencesQuery } from "@/store/apiSlice";
 
 const About = () => {
   const { data: profileData } = useGetProfileQuery();
@@ -16,38 +23,78 @@ const About = () => {
       title: "Frontend Development",
       icon: <Code size={20} className="text-purple-500" />,
       skills: profile.skillsFrontend
-        ? profile.skillsFrontend.split(',').map(s => s.trim()).filter(Boolean)
-        : ["React.js", "Next.js", "Tailwind CSS", "Redux Toolkit", "Zustand", "HTML5 & CSS3", "TypeScript"]
+        ? profile.skillsFrontend
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [
+            "React.js",
+            "Next.js",
+            "Tailwind CSS",
+            "Redux Toolkit",
+            "Zustand",
+            "HTML5 & CSS3",
+            "TypeScript",
+          ],
     },
     {
       title: "Backend & Databases",
       icon: <Server size={20} className="text-indigo-500" />,
       skills: profile.skillsBackend
-        ? profile.skillsBackend.split(',').map(s => s.trim()).filter(Boolean)
-        : ["Node.js", "Express.js", "PostgreSQL", "MongoDB", "Redis", "RESTful APIs", "GraphQL"]
+        ? profile.skillsBackend
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [
+            "Node.js",
+            "Express.js",
+            "PostgreSQL",
+            "MongoDB",
+            "Redis",
+            "RESTful APIs",
+            "GraphQL",
+          ],
     },
     {
       title: "Tools & DevOps",
       icon: <Wrench size={20} className="text-emerald-500" />,
       skills: profile.skillsDevops
-        ? profile.skillsDevops.split(',').map(s => s.trim()).filter(Boolean)
-        : ["Git & GitHub", "Docker", "Linux Terminal", "Vercel / Render", "Postman", "CI/CD", "Figma"]
-    }
+        ? profile.skillsDevops
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [
+            "Git & GitHub",
+            "Docker",
+            "Linux Terminal",
+            "Vercel / Render",
+            "Postman",
+            "CI/CD",
+            "Figma",
+          ],
+    },
   ];
 
   const education = [
     {
       degree: "B.Sc. in Computer Science & Engineering",
-      institution: "Dhaka International University",
+      institution: "Manarat International University",
+      period: "2025 - running",
+      description:
+        "Acquired a comprehensive technical foundation in core computer science paradigms, covering advanced Data Structures, Algorithm design, Relational Databases (DBMS), and Software Architecture. This intensive engineering coursework paved the way for my transition into building production-grade full-stack systems.",
+    },
+    {
+      degree: "Diploma in Computer Engineering",
+      institution: "Sherpur polytechnic institute",
       period: "2019 - 2023",
-      description: "Completed coursework in Data Structures, Algorithms, DBMS, Software Engineering, and Web Technologies."
-    }
+      description:
+        "Acquired a comprehensive technical foundation in core computer science paradigms, covering advanced Data Structures, Algorithm design, Relational Databases (DBMS), and Software Architecture. This intensive engineering coursework paved the way for my transition into building production-grade full-stack systems..",
+    },
   ];
 
   return (
     <div className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16 animate-fade-in">
-        
         {/* Intro Grid */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
           <div className="md:col-span-1 flex flex-col items-center text-center">
@@ -66,8 +113,12 @@ const About = () => {
               )}
             </div>
             <h1 className="text-2xl font-black">{profile.name}</h1>
-            <p className="text-sm text-purple-600 dark:text-purple-400 font-semibold">{profile.title}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{profile.location}</p>
+            <p className="text-sm text-purple-600 dark:text-purple-400 font-semibold">
+              {profile.title}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+              {profile.location}
+            </p>
           </div>
 
           <div className="md:col-span-2 space-y-4">
@@ -78,9 +129,12 @@ const About = () => {
               {profile.aboutMe}
             </p>
             <div className="bg-white dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/80 rounded-xl p-5 shadow-sm space-y-3">
-              <h3 className="font-bold text-sm text-slate-850 dark:text-slate-250">Work Style & Philosophy</h3>
+              <h3 className="font-bold text-sm text-slate-850 dark:text-slate-250">
+                Work Style & Philosophy
+              </h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                {profile.workPhilosophy || "I believe in writing clear, maintainable code rather than clever hacks. I prioritize communication and transparency, making sure my clients are fully updated via regular check-ins and demo builds."}
+                {profile.workPhilosophy ||
+                  "I believe in writing clear, maintainable code rather than clever hacks. I prioritize communication and transparency, making sure my clients are fully updated via regular check-ins and demo builds."}
               </p>
             </div>
           </div>
@@ -99,7 +153,9 @@ const About = () => {
               >
                 <div className="flex items-center gap-2">
                   {group.icon}
-                  <h3 className="font-bold text-slate-800 dark:text-slate-100">{group.title}</h3>
+                  <h3 className="font-bold text-slate-800 dark:text-slate-100">
+                    {group.title}
+                  </h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {group.skills.map((skill) => (
@@ -130,12 +186,16 @@ const About = () => {
                     <Calendar size={12} />
                     {item.period}
                   </span>
-                  <h3 className="font-bold text-slate-800 dark:text-slate-100">{item.role}</h3>
+                  <h3 className="font-bold text-slate-800 dark:text-slate-100">
+                    {item.role}
+                  </h3>
                   <span className="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                     <Briefcase size={12} />
                     {item.company}
                   </span>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1">{item.description}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1">
+                    {item.description}
+                  </p>
                 </div>
               </div>
             ))}
@@ -156,18 +216,21 @@ const About = () => {
                     <Calendar size={12} />
                     {edu.period}
                   </span>
-                  <h3 className="font-bold text-slate-800 dark:text-slate-100">{edu.degree}</h3>
+                  <h3 className="font-bold text-slate-800 dark:text-slate-100">
+                    {edu.degree}
+                  </h3>
                   <span className="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                     <GraduationCap size={12} />
                     {edu.institution}
                   </span>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1">{edu.description}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1">
+                    {edu.description}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
         </section>
-
       </div>
     </div>
   );
